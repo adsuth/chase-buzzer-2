@@ -1,0 +1,12 @@
+{
+  "name": "chase-buzzer-2",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "cd client && npm i; cd ../server && npm i; echo '\n\nNow start the client and server in two separate terminals\n'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
