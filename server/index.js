@@ -8,12 +8,15 @@ const bodyParser = require("body-parser")
 require('dotenv').config( {path: '../.env'} );
 
 const app     = express()
-const clientLocalhost = `http://localhost:${process.env.CLIENT_PORT}`
+const clientLocalhost = `http://127.0.0.1:${process.env.CLIENT_PORT}`
 const port    = process.env.PORT || 4000
 
-const GAMES = []
+const GAMES = ["1234"]
+var PLAYERS = []
+var CHASERS = []
 
 app.use( bodyParser.urlencoded({extended: true}) )
+app.use( bodyParser.json() );
 app.use( express.static("public") )
 app.use( cors( {origin: [clientLocalhost]} ) )
 app.use( session({
@@ -28,13 +31,24 @@ app.get("/play", (req, res) => {
 
 app.post("/join_game", (req, res) => {
   // todo: this should check if the session exists
-  const id = req.body
-  const validGame = GAMES.includes(id)
+  const id = req.body.gameId;
+  const user = req.body.userName;
+  const type = req.body.userType;
 
-  console.log( {id, GAMES} )
+  const validGame = GAMES.includes(id);
+  if (!validGame) { return res.status(400).send({}); }
 
-  return validGame ? res.status( 200 ).send({}) : res.status( 400 ).send({})
+  type === "player" ?
+    PLAYERS.push({ id: Math.random(), name: user, pass: false }) :
+    CHASERS.push({ id: Math.random(), name: user, pass: false })
+
+  return res.status(200).send({});
 })
+
+app.post("/remove_users", (req, res) => {
+  PLAYERS = [];
+  CHASERS = [];
+});
 
 const server = http.createServer( {}, app )
 const io = socketIo( server, {
@@ -64,6 +78,9 @@ io.on( "connection", (socket) => {
     socket.emit( "host_setup", newGameId )
   } )
 
+  socket.on("join_game", () => {
+    socket.emit("lobby_setup", { PLAYERS: PLAYERS, CHASERS: CHASERS })
+  })
 })
 
 

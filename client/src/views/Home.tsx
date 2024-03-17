@@ -1,11 +1,6 @@
-import { useAtom } from "jotai"
-import { pageStateAtom, socketAtom } from "../atoms"
-import { PageStateEnum } from "../definitions"
-import { useRef } from "react"
-import { Socket } from "socket.io-client"
 import GameManagementButtons from "./components/GameManagementButtons"
 
-export default function Home() 
+export const Home = () => 
 {
   return (
     <>

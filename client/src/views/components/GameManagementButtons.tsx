@@ -1,45 +1,56 @@
 import { useAtom } from "jotai"
-import React, { useRef } from "react"
+import { useState } from "react"
 import { socketAtom } from "../../atoms"
 import { SOCKET_ORIGIN } from "../../env"
 
 export default function GameManagementButtons() {
   const [ socket ] = useAtom( socketAtom )
-  const _gameIdInput = useRef<HTMLInputElement>( null )
+  const [gameId, setGameId] = useState<string>("");
+  const [user, setUser] = useState<string>("");
 
-  function handleHostSetup()
-  {
-    if ( _gameIdInput.current === null ) return console.error( "[ adsu ] :: ID input couldnt be found" )
-    socket?.emit( "host_new_game", _gameIdInput.current.valueAsNumber )
-  }
+  // function handleHostSetup()
+  // {
+  //   if ( _gameIdInput.current === null ) return console.error( "[ adsu ] :: ID input couldnt be found" )
+  //   socket?.emit( "host_new_game", _gameIdInput.current.valueAsNumber )
+  // };
 
-  async function handleJoinGame()
-  {
-    if ( _gameIdInput.current === null ) return console.error( "[ adsu ] :: ID input couldnt be found" )
-    const id = _gameIdInput.current.value
+  const handleJoinGame = async (type: "player" | "chaser") => {
+    if (!gameId) { return console.error("No game ID provided"); }
+    if (!user) { return console.error("No user name provided"); }
   
-    const res = await fetch( `${SOCKET_ORIGIN}/join_game`, {
+    const res = await fetch(`${SOCKET_ORIGIN}/join_game`, {
       method: "POST",
-      body: id
-    } )
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        gameId: gameId,
+        userName: user,
+        userType: type,
+      })
+    })
 
-    console.log( {status: res.status, id} )
-    
-    if ( res.status !== 200 ) return alert( `Error: No session with ID "${id}"` )
+    if (res.status !== 200) { return alert(`Error: No session with ID "${gameId}"`); }
 
-    console.log( {status: res.status, id} )
+    socket?.emit("join_game");
+  };
 
+  const handleClearUsers = async () => {
+    await fetch(`${SOCKET_ORIGIN}/remove_users`, {
+      method: "POST",
+    })
+  };
 
-    // todo actually make this do what its supposed to  
-    alert( "Found session, joining" )
-  }
   return (<>
     <div>
-        <input ref={_gameIdInput} type="text" placeholder="Game ID"/>
+        <input onChange={(e) => setGameId(e.target.value)} type="text" placeholder="Game ID"/>
+        <input onChange={(e) => setUser(e.target.value)} type="text" placeholder="User Name"/>
       </div>
     <div>
-      <button onClick={handleJoinGame}>Join Game</button>
-      <button onClick={handleHostSetup}>Host a Game</button>
+      <button onClick={() => handleJoinGame("player")}>Join as Player</button>
+      <button onClick={() => handleJoinGame("chaser")}>Join as Chaser</button>
+      <button onClick={handleClearUsers}>CLEAR USERS</button>
+      {/* <button onClick={handleHostSetup}>Host a Game</button> */}
     </div>
-  </> )
+  </>)
 }
