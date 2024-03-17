@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { User } from './types';
 import { Buzzer, UserList } from '.';
+import { useAtom } from 'jotai';
+import { chasersAtom, playersAtom } from '../../../atoms';
 
 import styles from './MainScreen.module.css';
 
-type Props = {
-  players: User[];
-  chasers: User[];
-};
-
-export const MainScreen = ({ players, chasers }: Props) => {
+export const MainScreen = () => {
   const [buzzer, setBuzzer] = useState<string>("");
+  const [players] = useAtom(playersAtom);
+  const [chasers] = useAtom(chasersAtom);
 
   const handleBuzz = () => {
     if (players.length === 0 || chasers.length === 0) { return; }
@@ -32,9 +30,9 @@ export const MainScreen = ({ players, chasers }: Props) => {
   return (<>
     <div className={styles.pageContainer}>
       <div className={styles.mainContent}>
-        <UserList type="PLAYERS" users={players} />
+        <UserList type="PLAYERS" />
         <Buzzer name="BUZZ" buzzerClass={styles.buzzerContainer} handleClick={handleBuzz} />
-        <UserList type="CHASERS" users={chasers} />
+        <UserList type="CHASERS" />
       </div>
       <div className={styles.buzzName}>
         {buzzer || <span>&nbsp;</span>}

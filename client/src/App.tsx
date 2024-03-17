@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { io } from "socket.io-client"
 import { SOCKET_ORIGIN } from "./env"
-import { gameIdAtom, pageStateAtom, socketAtom } from "./atoms"
+import { chasersAtom, gameIdAtom, pageStateAtom, playersAtom, socketAtom } from "./atoms"
 import { PageStateEnum } from "./definitions"
 import { useAtom } from "jotai"
 import { Home, MainScreen } from "./views"
@@ -13,8 +13,8 @@ function App() {
   const [ pageState, setPageState ] = useAtom( pageStateAtom )
   const [ socket, setSocket ] = useAtom( socketAtom )
   const [ id, setId ] = useAtom( gameIdAtom )
-  const [ players, setPlayers ] = useState<User[]>([]);
-  const [ chasers, setChasers ] = useState<User[]>([]);
+  const [ _players, setPlayers ] = useAtom<User[]>( playersAtom );
+  const [ _chasers, setChasers ] = useAtom<User[]>( chasersAtom );
 
   function getPageContent()
   {
@@ -23,7 +23,7 @@ function App() {
       case PageStateEnum.HOST_SETUP:
         return <h1>todo: add HOST_SETUP page (id is {id})</h1>;
       case PageStateEnum.PLAYING:
-        return <MainScreen players={players} chasers={chasers} />;
+        return <MainScreen />;
       default:
         return <Home />
     }
